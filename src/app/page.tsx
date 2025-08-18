@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import { Container, Typography, Box, CircularProgress, Alert, Grid } from "@mui/material";
+import { Container, Typography, Box, CircularProgress, Alert, Grid, Fade } from "@mui/material";
 import SearchBar from "../components/SearchBar";
 import CurrentWeather from "../components/CurrentWeather";
 import DailyForecast from "../components/DailyForecast";
@@ -119,24 +119,30 @@ export default function Home() {
             </Alert>
           )}
           {weatherData && !loading && !error && (
-            <Box sx={{ width: "100%" }}>
-              <Typography variant="h4" component="h2" gutterBottom align="center">
-                {city}
-              </Typography>
-              <CurrentWeather data={weatherData.current} />
-            </Box>
+            <Fade in={weatherData && !loading && !error} timeout={1000}>
+              <Box sx={{ width: "100%" }}>
+                <Typography variant="h4" component="h2" gutterBottom align="center">
+                  {city}
+                </Typography>
+                <CurrentWeather data={weatherData.current} />
+              </Box>
+            </Fade>
           )}
         </Grid>
 
         {weatherData && !loading && !error && (
-          <>
-            <Grid sx={{ xs: 12, md: 6 }}>
-              <DailyForecast data={weatherData.daily} />
-            </Grid>
-            <Grid sx={{ xs: 12, md: 6 }}>
-              <HourlyForecast data={weatherData.hourly} />
-            </Grid>
-          </>
+          <Fade in={weatherData && !loading && !error} timeout={1000}>
+            <Box sx={{ width: "100%" }}>
+              <Grid container spacing={3}>
+                <Grid sx={{ xs: 12, md: 6 }}>
+                  <DailyForecast data={weatherData.daily} />
+                </Grid>
+                <Grid sx={{ xs: 12, md: 6 }}>
+                  <HourlyForecast data={weatherData.hourly} />
+                </Grid>
+              </Grid>
+            </Box>
+          </Fade>
         )}
       </Grid>
     </Container>

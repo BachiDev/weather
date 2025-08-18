@@ -4,6 +4,10 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background: linear-gradient(135deg,rgba(41, 106, 186, 1) 0%, rgba(184, 72, 212, 1) 60%, rgba(57, 24, 163, 1) 100%); /* New blue-purple-dark purple gradient */
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  min-height: 100vh;
   color: #ffffff; /* White text */
 }
 
