@@ -102,7 +102,7 @@ export default function Home() {
         Weather Dashboard
       </Typography>
       <Grid container spacing={3} justifyContent="space-between" alignItems="flex-start">
-        <Grid sx={{ xs: 12, md: 6, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "flex-start" }}>
+        <Grid sx={{ xs: 12, md: 6, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: { xs: "center", md: "flex-start" } }}>
           <Box sx={{ mb: 3 }}>
             <SearchBar onSearch={handleSearch} />
           </Box>
@@ -141,3 +141,4 @@ export default function Home() {
       </Grid>
     </Container>
   );
+}

@@ -24,7 +24,7 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({ data }) => {
   }));
 
   return (
-    <Paper elevation={3} sx={{ p: 3, backgroundColor: "rgba(33, 33, 33, 0.7)", color: "white", borderRadius: 16 }}>
+    <Paper elevation={3} sx={{ p: 2, backgroundColor: "rgba(33, 33, 33, 0.7)", color: "white", borderRadius: 16 }}>
       <Typography variant="h5" component="h3" gutterBottom align="center">
         24-Hour Forecast
       </Typography>
@@ -35,7 +35,7 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({ data }) => {
           ]}
           xAxis={[{ scaleType: 'band', data: chartData.map(d => d.hour) }]} // Use band scale for categorical data
           yAxis={[{ label: 'Temperature (°C)' }]} // Label for Y-axis
-          margin={{ left: 70, right: 20, top: 30, bottom: 50 }} // Adjust margins for labels
+          margin={{ left: 10, right: 10, top: 30, bottom: 30 }} // Adjust margins for labels
           grid={{ vertical: true, horizontal: true }} // Add grid lines
           slotProps={{
             legend: {
