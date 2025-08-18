@@ -17,7 +17,13 @@ interface CurrentWeatherProps {
 
 const CurrentWeather: React.FC<CurrentWeatherProps> = ({ data }) => {
   return (
-    <Paper elevation={3} sx={{ p: 3, mb: 4, backgroundColor: "rgba(33, 33, 33, 0.7)", color: "white", borderRadius: 16 }}>
+    <Paper elevation={3} sx={{
+      p: 5, mb: 4, backgroundColor: "rgba(33, 33, 33, 0.7)", color: "white", borderRadius: 16,
+      transition: "box-shadow 0.3s ease-in-out",
+      "&:hover": {
+        boxShadow: "0px 0px 20px 5px rgba(255, 255, 255, 0.5)", // White glow
+      },
+    }}>
       <Grid container spacing={2} alignItems="center" sx={{ width: "100%", justifyContent: { xs: "center", md: "space-between" } }}>
         <Grid sx={{ xs: 12, md: 6, display: "flex", flexDirection: "column", alignItems: "center" }}>
           <WeatherIcon weatherCode={data.weather_code} sx={{ fontSize: 100, mb: 1 }} />

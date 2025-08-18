@@ -8,6 +8,9 @@ const darkTheme = createTheme({
   palette: {
     mode: "dark",
   },
+  typography: {
+    fontFamily: "var(--font-geist-mono)",
+  },
 });
 
 export default function ThemeRegistry({ children }: { children: React.ReactNode }) {
