@@ -21,7 +21,7 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({ data }) => {
       p: 5, mb: 4, backgroundColor: "rgba(33, 33, 33, 0.7)", color: "white", borderRadius: 16,
       transition: "box-shadow 0.3s ease-in-out",
       "&:hover": {
-        boxShadow: "0px 0px 20px 5px rgba(255, 255, 255, 0.5)", // White glow
+        boxShadow: "0px 0px 20px 5px rgba(255, 255, 255, 0.5)",
       },
     }}>
       <Grid container spacing={2} alignItems="center" sx={{ width: "100%", justifyContent: "space-around" }}>

@@ -28,7 +28,7 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({ data }) => {
       p: 2, backgroundColor: "rgba(33, 33, 33, 0.7)", color: "white", borderRadius: 16,
       transition: "box-shadow 0.3s ease-in-out",
       "&:hover": {
-        boxShadow: "0px 0px 20px 5px rgba(255, 255, 255, 0.5)", // White glow
+        boxShadow: "0px 0px 20px 5px rgba(255, 255, 255, 0.5)",
       },
     }}>
       <Typography variant="h5" component="h3" gutterBottom align="center">
@@ -39,10 +39,10 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({ data }) => {
           series={[
             { data: chartData.map(d => d.temp), label: 'Temperature (°C)', color: '#ffffffff' },
           ]}
-          xAxis={[{ scaleType: 'band', data: chartData.map(d => d.hour) }]} // Use band scale for categorical data
-          yAxis={[{ label: 'Temperature (°C)' }]} // Label for Y-axis
-          margin={{ left: 10, right: 10, top: 30, bottom: 30 }} // Adjust margins for labels
-          grid={{ vertical: true, horizontal: true }} // Add grid lines
+          xAxis={[{ scaleType: 'band', data: chartData.map(d => d.hour) }]}
+          yAxis={[{ label: 'Temperature (°C)' }]}
+          margin={{ left: 10, right: 10, top: 30, bottom: 30 }}
+          grid={{ vertical: true, horizontal: true }}
           slotProps={{
             legend: {
               position: { vertical: 'top', horizontal: 'center' },

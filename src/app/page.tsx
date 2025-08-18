@@ -41,7 +41,7 @@ interface CityData {
   longitude: number;
   name: string;
   country: string;
-  label: string; // For Autocomplete display
+  label: string;
 }
 
 interface GeoResult {
@@ -79,18 +79,15 @@ export default function Home() {
   }, []);
 
   const fetchCityOptions = useCallback(async (cityName: string) => {
-    // setLoading(true); // Don't set main loading for options search
-    // setError(null); // Don't set main error for options search
-    setCityOptions([]); // Clear previous options
+    setCityOptions([]);
 
     if (!cityName.trim()) {
-      // setLoading(false); // Don't set main loading
       return;
     }
 
     try {
       const response = await axios.get(
-        `https://geocoding-api.open-meteo.com/v1/search?name=${cityName}&count=10&language=en&format=json` // Request more results
+        `https://geocoding-api.open-meteo.com/v1/search?name=${cityName}&count=10&language=en&format=json`
       );
 
       if (response.data.results && response.data.results.length > 0) {
@@ -109,23 +106,16 @@ export default function Home() {
         });
 
         setCityOptions(options);
-      } else if (cityName.trim()) { // Only set error if search term was not empty
-        // setError("City not found. Please try a different city."); // Don't set main error
-      }
+      } 
     } catch (err) {
-      // setError("Failed to fetch city options. Please try again."); // Don't set main error
       console.error(err);
-    } finally {
-      // setLoading(false); // Don't set main loading
     }
   }, []);
 
   useEffect(() => {
-    // Fetch weather data only when a city is explicitly selected
     if (selectedCity) {
       fetchWeatherData(selectedCity.latitude, selectedCity.longitude);
     } else {
-      // Clear weather data if no city is selected
       setWeatherData(null);
     }
   }, [selectedCity, fetchWeatherData]);
@@ -133,9 +123,8 @@ export default function Home() {
   const handleSearchInputChange = (newCity: string) => {
     setCity(newCity);
     if (newCity.trim()) {
-      fetchCityOptions(newCity); // Fetch options when user types
+      fetchCityOptions(newCity);
     } else {
-      // Clear options if search bar is empty
       setCityOptions([]);
       setError(null);
     }
@@ -143,11 +132,10 @@ export default function Home() {
 
   const handleCitySelect = (selected: CityData | null) => {
     setSelectedCity(selected);
-    setCityOptions([]); // Clear options after selection
+    setCityOptions([]);
   };
 
   useEffect(() => {
-    // Initial load for default city
     const loadDefaultCity = async () => {
       if (city === "Vienna" && !selectedCity) {
         setLoading(true);
@@ -182,11 +170,9 @@ export default function Home() {
   }, [city, selectedCity]);
 
   useEffect(() => {
-    // Fetch weather data only when a city is explicitly selected
     if (selectedCity) {
       fetchWeatherData(selectedCity.latitude, selectedCity.longitude);
     } else {
-      // Clear weather data if no city is selected
       setWeatherData(null);
     }
   }, [selectedCity, fetchWeatherData]);

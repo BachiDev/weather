@@ -27,7 +27,7 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ data }) => {
       p: 2, mb: 4, backgroundColor: "rgba(33, 33, 33, 0.7)", color: "white", borderRadius: 16,
       transition: "box-shadow 0.3s ease-in-out",
       "&:hover": {
-        boxShadow: "0px 0px 20px 5px rgba(255, 255, 255, 0.5)", // White glow
+        boxShadow: "0px 0px 20px 5px rgba(255, 255, 255, 0.5)",
       },
     }}>
       <Typography variant="h5" component="h3" gutterBottom align="center">
@@ -39,10 +39,10 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ data }) => {
             { data: chartData.map(d => d.maxTemp), label: 'Max Temp (°C)', color: '#ff5252' },
             { data: chartData.map(d => d.minTemp), label: 'Min Temp (°C)', color: '#42a5f5' },
           ]}
-          xAxis={[{ scaleType: 'band', data: chartData.map(d => d.day) }]} // Use band scale for categorical data
-          yAxis={[{ label: 'Temperature (°C)' }]} // Label for Y-axis
-          margin={{ left: 10, right: 10, top: 30, bottom: 30 }} // Adjust margins for labels
-          grid={{ vertical: true, horizontal: true }} // Add grid lines
+          xAxis={[{ scaleType: 'band', data: chartData.map(d => d.day) }]}
+          yAxis={[{ label: 'Temperature (°C)' }]}
+          margin={{ left: 10, right: 10, top: 30, bottom: 30 }}
+          grid={{ vertical: true, horizontal: true }}
           slotProps={{
             legend: {
               position: { vertical: 'top', horizontal: 'center' },

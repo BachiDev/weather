@@ -9,11 +9,11 @@ interface CityData {
   longitude: number;
   name: string;
   country: string;
-  label: string; // For Autocomplete display
+  label: string;
 }
 
 interface SearchBarProps {
-  onSearchInputChange: (city: string) => void; // New prop for debounced input changes
+  onSearchInputChange: (city: string) => void;
   options: CityData[];
   onCitySelect: (city: CityData | null) => void;
 }
@@ -28,8 +28,8 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearchInputChange, options, onC
       clearTimeout(debounceTimeout.current);
     }
     debounceTimeout.current = setTimeout(() => {
-      onSearchInputChange(newInputValue); // Call the new prop
-    }, 300); // Debounce for 300ms
+      onSearchInputChange(newInputValue);
+    }, 300);
   };
 
   return (
@@ -46,10 +46,10 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearchInputChange, options, onC
         fullWidth
         options={options}
         getOptionLabel={(option) => option.label}
-        filterOptions={(x) => x} // Disable built-in filtering as API handles it
+        filterOptions={(x) => x}
         includeInputInList
         filterSelectedOptions
-        value={null} // Controlled by inputValue
+        value={null}
         onChange={(event, newValue) => {
           onCitySelect(newValue);
         }}
@@ -68,7 +68,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearchInputChange, options, onC
             {...params}
             label="Enter city name"
             variant="outlined"
-            value={inputValue} // Use inputValue as the controlled value
+            value={inputValue}
             sx={{
               input: { color: "white" },
               label: { color: "rgba(255, 255, 255, 0.7)" },
@@ -76,26 +76,25 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearchInputChange, options, onC
               "& .MuiOutlinedInput-root": {
                 borderRadius: 25,
                 backgroundColor: "rgba(33, 33, 33, 0.7)",
-                minHeight: 56, // Standard Material-UI input height
+                minHeight: 56,
                 "& fieldset": {
-                  borderColor: "transparent", // Remove default border
+                  borderColor: "transparent",
                 },
                 "&:hover fieldset": {
-                  borderColor: "rgba(255, 255, 255, 0.3)", // Lighter border on hover
+                  borderColor: "rgba(255, 255, 255, 0.3)",
                 },
                 "&.Mui-focused fieldset": {
-                  borderColor: "rgba(255, 255, 255, 0.5)", // Even lighter border on focus
+                  borderColor: "rgba(255, 255, 255, 0.5)",
                 },
               },
             }}
           />
         )}
         sx={{
-          flexGrow: 1, // Allow Autocomplete to grow and take available space
-          marginRight: 2, // Add margin instead of gap
+          flexGrow: 1,
+          marginRight: 2,
           "& .MuiAutocomplete-inputRoot": {
             borderRadius: 25,
-            // Removed paddingRight: "0px !important",
           },
         }}
       />
