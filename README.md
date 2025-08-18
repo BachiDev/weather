@@ -1,4 +1,36 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Weather Dashboard
+
+This project is a modern and responsive weather dashboard built with Next.js, React, and TypeScript. It provides current weather conditions, a 7-day daily forecast, and a detailed hourly forecast for any searched city.
+
+[Check Out Live](https://bachidev.github.io/weather)
+
+## Technical Details
+
+### Architecture & Design
+
+The application follows a clean and modular architecture, emphasizing separation of concerns and reusability. Key architectural decisions include:
+
+*   **Component-Based UI**: Built with React, leveraging functional components and hooks for state management and side effects.
+*   **Custom Hooks**: Extensive use of custom hooks (`useSearch` and `useWeather`) to encapsulate complex logic, such as city search functionality, default city loading, and weather data fetching. This significantly improves code readability, reusability, and testability of the `page.tsx` component.
+*   **API Layer Abstraction**: All external API calls are centralized in `api.ts`, abstracting the data fetching logic from the UI components. This file also utilizes base URLs for different API endpoints and helper functions for data transformation, ensuring a clean and maintainable API interaction layer.
+*   **Type Safety**: Developed entirely in TypeScript, providing strong type checking throughout the application, which enhances code quality and reduces runtime errors.
+
+### Key Features
+
+*   **City Search**: Users can search for any city worldwide to get weather information.
+*   **Current Weather**: Displays real-time temperature, apparent temperature, wind speed, humidity, and pressure.
+*   **Daily Forecast**: Provides a 7-day forecast including daily maximum and minimum temperatures, sunrise, and sunset times.
+*   **Hourly Forecast**: Offers detailed hourly temperature and weather conditions.
+*   **Responsive Design**: Built with Material-UI (`@mui/material`) components to ensure a consistent and adaptive user experience across various devices.
+
+### Technologies Used
+
+*   **Framework**: Next.js (React framework for production)
+*   **Language**: TypeScript
+*   **UI Library**: Material-UI (MUI)
+*   **HTTP Client**: Axios
+*   **Weather API**: Open-Meteo API (for current, daily, and hourly weather data)
+*   **Geocoding API**: Open-Meteo Geocoding API (for city search and location data)
 
 ## Getting Started
 
@@ -15,22 +47,3 @@ bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
