@@ -37,7 +37,7 @@ const HourlyForecast: React.FC<HourlyForecastProps> = ({ data }) => {
       <Box sx={{ width: '100%', height: 300 }}>
         <LineChart
           series={[
-            { data: chartData.map(d => d.temp), label: 'Temperature (°C)', color: '#ff9800' },
+            { data: chartData.map(d => d.temp), label: 'Temperature (°C)', color: '#ffffffff' },
           ]}
           xAxis={[{ scaleType: 'band', data: chartData.map(d => d.hour) }]} // Use band scale for categorical data
           yAxis={[{ label: 'Temperature (°C)' }]} // Label for Y-axis

@@ -69,7 +69,6 @@ export default function Home() {
       const response = await axios.get(
         `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,wind_speed_10m,relative_humidity_2m,surface_pressure,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset&hourly=temperature_2m,weather_code&timezone=auto&forecast_days=7`
       );
-      console.log("Open-Meteo API Response:", response.data);
       setWeatherData(response.data);
     } catch (err) {
       setError("Failed to fetch weather data. Please try again.");
