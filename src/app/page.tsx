@@ -79,12 +79,12 @@ export default function Home() {
   }, []);
 
   const fetchCityOptions = useCallback(async (cityName: string) => {
-    setLoading(true);
-    setError(null);
+    // setLoading(true); // Don't set main loading for options search
+    // setError(null); // Don't set main error for options search
     setCityOptions([]); // Clear previous options
 
     if (!cityName.trim()) {
-      setLoading(false);
+      // setLoading(false); // Don't set main loading
       return;
     }
 
@@ -110,13 +110,13 @@ export default function Home() {
 
         setCityOptions(options);
       } else if (cityName.trim()) { // Only set error if search term was not empty
-        setError("City not found. Please try a different city.");
+        // setError("City not found. Please try a different city."); // Don't set main error
       }
     } catch (err) {
-      setError("Failed to fetch city options. Please try again.");
+      // setError("Failed to fetch city options. Please try again."); // Don't set main error
       console.error(err);
     } finally {
-      setLoading(false);
+      // setLoading(false); // Don't set main loading
     }
   }, []);
 
