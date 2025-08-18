@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useState} from "react";
-import { TextField, Button, Box, Autocomplete } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
+import React, { useState, useRef } from "react";
+import { TextField, Box, Autocomplete } from "@mui/material";
 
 interface CityData {
   id: number;
@@ -14,33 +13,27 @@ interface CityData {
 }
 
 interface SearchBarProps {
-  onSearch: (city: string) => void;
+  onSearchInputChange: (city: string) => void; // New prop for debounced input changes
   options: CityData[];
   onCitySelect: (city: CityData | null) => void;
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ onSearch, options, onCitySelect }) => {
+const SearchBar: React.FC<SearchBarProps> = ({ onSearchInputChange, options, onCitySelect }) => {
   const [inputValue, setInputValue] = useState<string>("");
-
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    if (inputValue.trim()) {
-      onSearch(inputValue);
-    }
-  };
+  const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const handleInputChange = (newInputValue: string) => {
     setInputValue(newInputValue);
-    // Trigger search for options only when user types, not on selection
-    if (newInputValue.trim()) {
-      onSearch(newInputValue);
+    if (debounceTimeout.current) {
+      clearTimeout(debounceTimeout.current);
     }
+    debounceTimeout.current = setTimeout(() => {
+      onSearchInputChange(newInputValue); // Call the new prop
+    }, 300); // Debounce for 300ms
   };
 
   return (
     <Box
-      component="form"
-      onSubmit={handleSubmit}
       sx={{
         display: "flex",
         alignItems: "center",
@@ -98,7 +91,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, options, onCitySelect }
         )}
         sx={{
           flexGrow: 1, // Allow Autocomplete to grow and take available space
-          // Removed marginRight: 2,
+          marginRight: 2, // Add margin instead of gap
           "& .MuiAutocomplete-inputRoot": {
             borderRadius: 25,
             // Removed paddingRight: "0px !important",
