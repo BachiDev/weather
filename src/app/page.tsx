@@ -1,103 +1,143 @@
-import Image from "next/image";
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import axios from "axios";
+import { Container, Typography, Box, CircularProgress, Alert, Grid } from "@mui/material";
+import SearchBar from "../components/SearchBar";
+import CurrentWeather from "../components/CurrentWeather";
+import DailyForecast from "../components/DailyForecast";
+import HourlyForecast from "../components/HourlyForecast";
+
+interface WeatherData {
+  current: {
+    temperature_2m: number;
+    apparent_temperature: number;
+    wind_speed_10m: number;
+    relative_humidity_2m: number;
+    surface_pressure: number;
+    weather_code: number;
+  };
+  daily: {
+    time: string[];
+    weather_code: number[];
+    temperature_2m_max: number[];
+    temperature_2m_min: number[];
+    sunrise: string[];
+    sunset: string[];
+  };
+  hourly: {
+    time: string[];
+    temperature_2m: number[];
+    weather_code: number[];
+  };
+  latitude: number;
+  longitude: number;
+  timezone: string;
+}
+
+interface CityData {
+  latitude: number;
+  longitude: number;
+  name: string;
+  country: string;
+}
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [city, setCity] = useState<string>("London");
+  const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+  const fetchWeatherData = useCallback(async (lat: number, lon: number) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get(
+        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,apparent_temperature,wind_speed_10m,relative_humidity_2m,surface_pressure,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset&hourly=temperature_2m,weather_code&timezone=auto&forecast_days=7`
+      );
+      console.log("Open-Meteo API Response:", response.data);
+      setWeatherData(response.data);
+    } catch (err) {
+      setError("Failed to fetch weather data. Please try again.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const fetchCityCoordinates = useCallback(async (cityName: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get(
+        `https://geocoding-api.open-meteo.com/v1/search?name=${cityName}&count=1&language=en&format=json`
+      );
+      if (response.data.results && response.data.results.length > 0) {
+        const { latitude, longitude, name, country } = response.data.results[0];
+        setCity(`${name}, ${country}`);
+        fetchWeatherData(latitude, longitude);
+      } else {
+        setError("City not found. Please try a different city.");
+        setWeatherData(null);
+      }
+    } catch (err) {
+      setError("Failed to fetch city coordinates. Please try again.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchWeatherData]);
+
+  useEffect(() => {
+    fetchCityCoordinates(city);
+  }, [city, fetchCityCoordinates]);
+
+  const handleSearch = (newCity: string) => {
+    setCity(newCity);
+  };
+
+  return (
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      <Typography variant="h3" component="h1" gutterBottom align="center" sx={{ mb: 4 }}>
+        Weather Dashboard
+      </Typography>
+      <Grid container spacing={3} justifyContent="space-between" alignItems="flex-start">
+        <Grid sx={{ xs: 12, md: 6, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "flex-start" }}>
+          <Box sx={{ mb: 3 }}>
+            <SearchBar onSearch={handleSearch} />
+          </Box>
+        </Grid>
+        <Grid sx={{ xs: 12, md: 6 }}>
+          {loading && (
+            <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
+              <CircularProgress />
+            </Box>
+          )}
+          {error && (
+            <Alert severity="error" sx={{ my: 4, width: "100%" }}>
+              {error}
+            </Alert>
+          )}
+          {weatherData && !loading && !error && (
+            <Box sx={{ width: "100%" }}>
+              <Typography variant="h4" component="h2" gutterBottom align="center">
+                {city}
+              </Typography>
+              <CurrentWeather data={weatherData.current} />
+            </Box>
+          )}
+        </Grid>
+
+        {weatherData && !loading && !error && (
+          <>
+            <Grid sx={{ xs: 12, md: 6 }}>
+              <DailyForecast data={weatherData.daily} />
+            </Grid>
+            <Grid sx={{ xs: 12, md: 6 }}>
+              <HourlyForecast data={weatherData.hourly} />
+            </Grid>
+          </>
+        )}
+      </Grid>
+    </Container>
   );
-}
