@@ -24,7 +24,7 @@ const CurrentWeather: React.FC<CurrentWeatherProps> = ({ data }) => {
         boxShadow: "0px 0px 20px 5px rgba(255, 255, 255, 0.5)", // White glow
       },
     }}>
-      <Grid container spacing={2} alignItems="center" sx={{ width: "100%", justifyContent: { xs: "center", md: "space-between" } }}>
+      <Grid container spacing={2} alignItems="center" sx={{ width: "100%", justifyContent: "space-around" }}>
         <Grid sx={{ xs: 12, md: 6, display: "flex", flexDirection: "column", alignItems: "center" }}>
           <WeatherIcon weatherCode={data.weather_code} sx={{ fontSize: 100, mb: 1 }} />
           <Typography variant="h2" component="div">

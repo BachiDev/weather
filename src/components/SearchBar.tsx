@@ -1,20 +1,39 @@
 "use client";
 
-import React, { useState } from "react";
-import { TextField, Button, Box } from "@mui/material";
+import React, { useState} from "react";
+import { TextField, Button, Box, Autocomplete } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+
+interface CityData {
+  id: number;
+  latitude: number;
+  longitude: number;
+  name: string;
+  country: string;
+  label: string; // For Autocomplete display
+}
 
 interface SearchBarProps {
   onSearch: (city: string) => void;
+  options: CityData[];
+  onCitySelect: (city: CityData | null) => void;
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
-  const [city, setCity] = useState<string>("");
+const SearchBar: React.FC<SearchBarProps> = ({ onSearch, options, onCitySelect }) => {
+  const [inputValue, setInputValue] = useState<string>("");
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    if (city.trim()) {
-      onSearch(city);
+    if (inputValue.trim()) {
+      onSearch(inputValue);
+    }
+  };
+
+  const handleInputChange = (newInputValue: string) => {
+    setInputValue(newInputValue);
+    // Trigger search for options only when user types, not on selection
+    if (newInputValue.trim()) {
+      onSearch(newInputValue);
     }
   };
 
@@ -24,35 +43,65 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
       onSubmit={handleSubmit}
       sx={{
         display: "flex",
-        gap: 2,
+        alignItems: "center",
         width: "100%",
-        maxWidth: 500,
         mt: 2,
         mb: 2,
       }}
     >
-      <TextField
-        label="Enter city name"
-        variant="outlined"
+      <Autocomplete
         fullWidth
-        value={city}
-        onChange={(e) => setCity(e.target.value)}
+        options={options}
+        getOptionLabel={(option) => option.label}
+        filterOptions={(x) => x} // Disable built-in filtering as API handles it
+        includeInputInList
+        filterSelectedOptions
+        value={null} // Controlled by inputValue
+        onChange={(event, newValue) => {
+          onCitySelect(newValue);
+        }}
+        onInputChange={(event, newInputValue, reason) => {
+          if (reason === 'input') {
+            handleInputChange(newInputValue);
+          }
+        }}
+        renderOption={(props, option) => (
+          <li {...props} key={option.id}>
+            {option.label}
+          </li>
+        )}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label="Enter city name"
+            variant="outlined"
+            sx={{
+              input: { color: "white" },
+              label: { color: "rgba(255, 255, 255, 0.7)" },
+              borderRadius: 25,
+              "& .MuiOutlinedInput-root": {
+                borderRadius: 25,
+                backgroundColor: "rgba(33, 33, 33, 0.7)",
+                minHeight: 56, // Standard Material-UI input height
+                "& fieldset": {
+                  borderColor: "transparent", // Remove default border
+                },
+                "&:hover fieldset": {
+                  borderColor: "rgba(255, 255, 255, 0.3)", // Lighter border on hover
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "rgba(255, 255, 255, 0.5)", // Even lighter border on focus
+                },
+              },
+            }}
+          />
+        )}
         sx={{
-          input: { color: "white" },
-          label: { color: "rgba(255, 255, 255, 0.7)" },
-          borderRadius: 25,
-          "& .MuiOutlinedInput-root": {
+          flexGrow: 1, // Allow Autocomplete to grow and take available space
+          marginRight: 2, // Add margin instead of gap
+          "& .MuiAutocomplete-inputRoot": {
             borderRadius: 25,
-            backgroundColor: "rgba(33, 33, 33, 0.7)",
-            "& fieldset": {
-              borderColor: "transparent", // Remove default border
-            },
-            "&:hover fieldset": {
-              borderColor: "rgba(255, 255, 255, 0.3)", // Lighter border on hover
-            },
-            "&.Mui-focused fieldset": {
-              borderColor: "rgba(255, 255, 255, 0.5)", // Even lighter border on focus
-            },
+            paddingRight: "0px !important", // Adjust padding for button
           },
         }}
       />
@@ -60,6 +109,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
         type="submit"
         endIcon={<SearchIcon />}
         sx={{
+          height: 56, // Match TextField height
           borderRadius: 25,
           px: 4, // More horizontal padding
           backgroundColor: "rgba(33, 33, 33, 0.7)",
