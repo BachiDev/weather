@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ThemeRegistry from "./ThemeRegistry";
-import FloatingActionButton from "@/components/FloatingActionButton";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
