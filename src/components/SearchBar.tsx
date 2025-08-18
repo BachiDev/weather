@@ -98,31 +98,16 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, options, onCitySelect }
         )}
         sx={{
           flexGrow: 1, // Allow Autocomplete to grow and take available space
-          marginRight: 2, // Add margin instead of gap
+          // Removed marginRight: 2,
           "& .MuiAutocomplete-inputRoot": {
             borderRadius: 25,
-            paddingRight: "0px !important", // Adjust padding for button
+            // Removed paddingRight: "0px !important",
           },
         }}
       />
-      <Button
-        type="submit"
-        endIcon={<SearchIcon />}
-        sx={{
-          height: 56, // Match TextField height
-          borderRadius: 25,
-          px: 4, // More horizontal padding
-          backgroundColor: "rgba(33, 33, 33, 0.7)",
-          color: "white",
-          "&:hover": {
-            backgroundColor: "rgba(33, 33, 33, 0.9)", // Darker on hover
-          },
-        }}
-      >
-        Search
-      </Button>
     </Box>
   );
 };
+
 
 export default SearchBar;

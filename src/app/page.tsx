@@ -44,6 +44,16 @@ interface CityData {
   label: string; // For Autocomplete display
 }
 
+interface GeoResult {
+  id: number;
+  latitude: number;
+  longitude: number;
+  name: string;
+  country: string;
+  admin1?: string;
+  postcode?: string[];
+}
+
 export default function Home() {
   const [city, setCity] = useState<string | null>("London");
   const [weatherData, setWeatherData] = useState<WeatherData | null>(null);
@@ -88,7 +98,7 @@ export default function Home() {
       );
 
       if (response.data.results && response.data.results.length > 0) {
-        const options: CityData[] = response.data.results.map((result: any) => {
+        const options: CityData[] = response.data.results.map((result: GeoResult) => {
           const state = result.admin1 ? `, ${result.admin1}` : "";
           const postal = result.postcode && result.postcode.length > 0 ? ` (${result.postcode[0]})` : "";
 
