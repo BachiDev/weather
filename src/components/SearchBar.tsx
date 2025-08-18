@@ -68,6 +68,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearchInputChange, options, onC
             {...params}
             label="Enter city name"
             variant="outlined"
+            value={inputValue} // Use inputValue as the controlled value
             sx={{
               input: { color: "white" },
               label: { color: "rgba(255, 255, 255, 0.7)" },
