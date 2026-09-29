@@ -1,56 +1,73 @@
 "use client";
 
-import React from "react";
-import { Box, Typography, Paper } from "@mui/material";
-import { LineChart } from '@mui/x-charts/LineChart';
+import { WeatherIcon } from "./WeatherIcon";
+import { Card } from "./ui/Card";
+import { SectionHeading } from "./ui/SectionHeading";
+import { sliceNext24Hours } from "@/lib/forecast";
+import { formatHourLabel, formatTemp, type TempUnit } from "@/lib/units";
+import { getWeatherDescription } from "@/lib/weatherCodes";
+import type { WeatherData } from "@/types/weather";
 
-interface HourlyForecastProps {
-  data: {
-    time: string[];
-    temperature_2m: number[];
-    weather_code: number[];
-  };
-}
+type HourlyForecastProps = {
+  data: WeatherData["hourly"];
+  /** Location-local `current.time` — anchors the 24h window without TZ math. */
+  currentTime: string;
+  tempUnit: TempUnit;
+};
 
-const HourlyForecast: React.FC<HourlyForecastProps> = ({ data }) => {
-  const now = new Date();
-  const currentHourIndex = data.time.findIndex(time => new Date(time).getHours() === now.getHours());
-  const next24HoursData = data.time.slice(currentHourIndex, currentHourIndex + 24);
-  const next24HoursTemperatures = data.temperature_2m.slice(currentHourIndex, currentHourIndex + 24);
-
-  const chartData = next24HoursData.map((time, index) => ({
-    hour: new Date(time).toLocaleTimeString("en-US", { hour: "numeric", hour12: true }),
-    temp: next24HoursTemperatures[index],
-  }));
+/**
+ * Next-24-hours as a scroll-snap strip: readable on mobile, no chart weight,
+ * every hour carries icon + temperature + screen-reader description.
+ */
+const HourlyForecast: React.FC<HourlyForecastProps> = ({
+  data,
+  currentTime,
+  tempUnit,
+}) => {
+  const points = sliceNext24Hours(data, currentTime);
 
   return (
-    <Paper elevation={3} sx={{
-      p: 2, backgroundColor: "rgba(33, 33, 33, 0.7)", color: "white", borderRadius: 16,
-      transition: "box-shadow 0.3s ease-in-out",
-      "&:hover": {
-        boxShadow: "0px 0px 20px 5px rgba(255, 255, 255, 0.5)",
-      },
-    }}>
-      <Typography variant="h5" component="h3" gutterBottom align="center">
-        24-Hour Forecast
-      </Typography>
-      <Box sx={{ width: '100%', height: 300 }}>
-        <LineChart
-          series={[
-            { data: chartData.map(d => d.temp), label: 'Temperature (°C)', color: '#ffffffff' },
-          ]}
-          xAxis={[{ scaleType: 'band', data: chartData.map(d => d.hour) }]}
-          yAxis={[{ label: 'Temperature (°C)' }]}
-          margin={{ left: 10, right: 10, top: 30, bottom: 30 }}
-          grid={{ vertical: true, horizontal: true }}
-          slotProps={{
-            legend: {
-              position: { vertical: 'top', horizontal: 'center' },
-            },
-          }}
-        />
-      </Box>
-    </Paper>
+    <Card>
+      <SectionHeading
+        level={3}
+        eyebrow="Next 24 hours"
+        title="Hourly forecast"
+      />
+      <ol
+        className="custom-scrollbar flex snap-x snap-mandatory gap-2 overflow-x-auto pb-2"
+        aria-label="Hourly temperature for the next 24 hours"
+      >
+        {points.map((point) => {
+          const description = getWeatherDescription(point.code);
+          return (
+            <li
+              key={point.time}
+              className="flex w-16 shrink-0 snap-start flex-col items-center gap-1 rounded-xl border border-white/10 bg-white/[0.02] px-2 py-3 text-center"
+              aria-label={`${formatHourLabel(point.time)}: ${formatTemp(point.temp, tempUnit)}, ${description}`}
+            >
+              <span
+                className="font-mono text-[11px] uppercase text-zinc-400"
+                aria-hidden="true"
+              >
+                {formatHourLabel(point.time)}
+              </span>
+              <WeatherIcon
+                code={point.code}
+                size={24}
+                className="text-brand-300"
+              />
+              <span
+                className="text-sm font-semibold text-zinc-100"
+                aria-hidden="true"
+              >
+                {formatTemp(point.temp, tempUnit)}
+              </span>
+              <span className="sr-only">{description}</span>
+            </li>
+          );
+        })}
+      </ol>
+    </Card>
   );
 };
 

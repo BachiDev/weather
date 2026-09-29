@@ -1,8 +1,13 @@
-interface WeatherData {
+// Shared weather-domain types. Single source of truth — import from here,
+// never re-declare these interfaces in components (see SearchBar fix, Phase 0).
+
+export interface WeatherData {
   current: {
     temperature_2m: number;
     apparent_temperature: number;
+    is_day: number;
     wind_speed_10m: number;
+    wind_direction_10m: number;
     relative_humidity_2m: number;
     surface_pressure: number;
     weather_code: number;
@@ -14,6 +19,8 @@ interface WeatherData {
     temperature_2m_min: number[];
     sunrise: string[];
     sunset: string[];
+    precipitation_probability_max: Array<number | null>;
+    wind_speed_10m_max: number[];
   };
   hourly: {
     time: string[];
@@ -22,10 +29,11 @@ interface WeatherData {
   };
   latitude: number;
   longitude: number;
+  utc_offset_seconds: number;
   timezone: string;
 }
 
-interface CityData {
+export interface CityData {
   id: number;
   latitude: number;
   longitude: number;
@@ -34,7 +42,7 @@ interface CityData {
   label: string;
 }
 
-interface GeoResult {
+export interface GeoResult {
   id: number;
   latitude: number;
   longitude: number;
@@ -43,5 +51,3 @@ interface GeoResult {
   admin1?: string;
   postcode?: string[];
 }
-
-export type { WeatherData, CityData, GeoResult };

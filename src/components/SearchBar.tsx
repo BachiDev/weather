@@ -1,26 +1,36 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { TextField, Box, Autocomplete } from "@mui/material";
-
-interface CityData {
-  id: number;
-  latitude: number;
-  longitude: number;
-  name: string;
-  country: string;
-  label: string;
-}
+import type { CityData } from "@/types/weather";
 
 interface SearchBarProps {
+  selected: CityData | null;
+  searching: boolean;
   onSearchInputChange: (city: string) => void;
   options: CityData[];
   onCitySelect: (city: CityData | null) => void;
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ onSearchInputChange, options, onCitySelect }) => {
+const SearchBar: React.FC<SearchBarProps> = ({
+  selected,
+  searching,
+  onSearchInputChange,
+  options,
+  onCitySelect,
+}) => {
   const [inputValue, setInputValue] = useState<string>("");
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  // Clear a pending debounce on unmount so a late timer never fires
+  // setState / callbacks on an unmounted component.
+  useEffect(() => {
+    return () => {
+      if (debounceTimeout.current) {
+        clearTimeout(debounceTimeout.current);
+      }
+    };
+  }, []);
 
   const handleInputChange = (newInputValue: string) => {
     setInputValue(newInputValue);
@@ -49,12 +59,20 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearchInputChange, options, onC
         filterOptions={(x) => x}
         includeInputInList
         filterSelectedOptions
-        value={null}
+        value={selected}
+        loading={searching}
+        loadingText="Searching…"
+        noOptionsText={
+          inputValue
+            ? "No cities found — try another spelling."
+            : "Start typing to search."
+        }
         onChange={(event, newValue) => {
+          setInputValue("");
           onCitySelect(newValue);
         }}
         onInputChange={(event, newInputValue, reason) => {
-          if (reason === 'input') {
+          if (reason === "input") {
             handleInputChange(newInputValue);
           }
         }}
@@ -75,16 +93,16 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearchInputChange, options, onC
               borderRadius: 25,
               "& .MuiOutlinedInput-root": {
                 borderRadius: 25,
-                backgroundColor: "rgba(33, 33, 33, 0.7)",
+                backgroundColor: "rgba(24, 24, 27, 0.7)",
                 minHeight: 56,
                 "& fieldset": {
-                  borderColor: "transparent",
+                  borderColor: "rgba(255, 255, 255, 0.1)",
                 },
                 "&:hover fieldset": {
-                  borderColor: "rgba(255, 255, 255, 0.3)",
+                  borderColor: "rgba(255, 255, 255, 0.2)",
                 },
                 "&.Mui-focused fieldset": {
-                  borderColor: "rgba(255, 255, 255, 0.5)",
+                  borderColor: "rgba(167, 139, 250, 0.6)",
                 },
               },
             }}
@@ -101,6 +119,5 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearchInputChange, options, onC
     </Box>
   );
 };
-
 
 export default SearchBar;

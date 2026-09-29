@@ -1,48 +1,78 @@
 "use client";
 
-import React from "react";
-import { Box, Typography, Paper, Grid } from "@mui/material";
-import WeatherIcon from "./WeatherIcon";
+import { WeatherIcon } from "./WeatherIcon";
+import { Card } from "./ui/Card";
+import { Stat } from "./ui/Stat";
+import {
+  formatSpeed,
+  formatTemp,
+  formatTimeOfDay,
+  formatWindDirection,
+  type SpeedUnit,
+  type TempUnit,
+} from "@/lib/units";
+import { getWeatherDescription } from "@/lib/weatherCodes";
+import type { WeatherData } from "@/types/weather";
 
-interface CurrentWeatherProps {
-  data: {
-    temperature_2m: number;
-    apparent_temperature: number;
-    wind_speed_10m: number;
-    relative_humidity_2m: number;
-    surface_pressure: number;
-    weather_code: number;
-  };
-}
+type CurrentWeatherProps = {
+  current: WeatherData["current"];
+  sunrise: string;
+  sunset: string;
+  tempUnit: TempUnit;
+  speedUnit: SpeedUnit;
+};
 
-const CurrentWeather: React.FC<CurrentWeatherProps> = ({ data }) => {
+const CurrentWeather: React.FC<CurrentWeatherProps> = ({
+  current,
+  sunrise,
+  sunset,
+  tempUnit,
+  speedUnit,
+}) => {
+  const isDay = current.is_day === 1;
+
   return (
-    <Paper elevation={3} sx={{
-      p: 5, mb: 4, backgroundColor: "rgba(33, 33, 33, 0.7)", color: "white", borderRadius: 16,
-      transition: "box-shadow 0.3s ease-in-out",
-      "&:hover": {
-        boxShadow: "0px 0px 20px 5px rgba(255, 255, 255, 0.5)",
-      },
-    }}>
-      <Grid container spacing={2} alignItems="center" sx={{ width: "100%", justifyContent: "space-around" }}>
-        <Grid sx={{ xs: 12, md: 6, display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <WeatherIcon weatherCode={data.weather_code} sx={{ fontSize: 100, mb: 1 }} />
-          <Typography variant="h2" component="div">
-            {data.temperature_2m}°C
-          </Typography>
-          <Typography variant="h6" color="text.secondary">
-            Feels like: {data.apparent_temperature}°C
-          </Typography>
-        </Grid>
-        <Grid sx={{ xs: 12, md: 6 }}>
-          <Box sx={{ textAlign: { xs: "center", md: "left" }, width: "100%" }}>
-            <Typography variant="body1">Wind Speed: {data.wind_speed_10m} km/h</Typography>
-            <Typography variant="body1">Humidity: {data.relative_humidity_2m}%</Typography>
-            <Typography variant="body1">Pressure: {data.surface_pressure} hPa</Typography>
-          </Box>
-        </Grid>
-      </Grid>
-    </Paper>
+    <Card className="p-6 md:p-8" aria-label="Current weather">
+      <div className="grid items-center gap-6 md:grid-cols-2">
+        <div className="flex flex-col items-center text-center">
+          <WeatherIcon
+            code={current.weather_code}
+            isDay={isDay}
+            size={96}
+            className="text-brand-300"
+          />
+          <p className="mt-2 text-6xl font-bold tracking-tight text-zinc-50">
+            {formatTemp(current.temperature_2m, tempUnit)}
+          </p>
+          <p className="mt-1 text-lg text-zinc-300">
+            {getWeatherDescription(current.weather_code)}
+          </p>
+          <p className="mt-1 font-mono text-xs uppercase tracking-wider text-zinc-400">
+            Feels like {formatTemp(current.apparent_temperature, tempUnit)}
+          </p>
+        </div>
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+          <Stat
+            value={`${formatSpeed(current.wind_speed_10m, speedUnit)} ${formatWindDirection(current.wind_direction_10m)}`}
+            label="Wind"
+          />
+          <Stat
+            value={`${Math.round(current.relative_humidity_2m)}%`}
+            label="Humidity"
+          />
+          <Stat
+            value={`${Math.round(current.surface_pressure)} hPa`}
+            label="Pressure"
+          />
+          <Stat
+            value={formatTemp(current.apparent_temperature, tempUnit)}
+            label="Feels like"
+          />
+          <Stat value={formatTimeOfDay(sunrise)} label="Sunrise" />
+          <Stat value={formatTimeOfDay(sunset)} label="Sunset" />
+        </div>
+      </div>
+    </Card>
   );
 };
 

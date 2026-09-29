@@ -1,56 +1,76 @@
 "use client";
 
-import React from "react";
-import { Box, Typography, Paper } from "@mui/material";
-import { LineChart } from '@mui/x-charts/LineChart';
+import dynamic from "next/dynamic";
+import { Box } from "@mui/material";
+import { Card } from "./ui/Card";
+import { SectionHeading } from "./ui/SectionHeading";
+import { DayCard } from "./DayCard";
+import { formatDayLabel, toTemp, type TempUnit } from "@/lib/units";
+import type { WeatherData } from "@/types/weather";
 
-interface DailyForecastProps {
-  data: {
-    time: string[];
-    weather_code: number[];
-    temperature_2m_max: number[];
-    temperature_2m_min: number[];
-    sunrise: string[];
-    sunset: string[];
-  };
-}
+const DailyChart = dynamic(
+  () => import("./DailyChart").then((m) => m.DailyChart),
+  {
+    ssr: false,
+    loading: () => (
+      <div
+        className="h-[300px] w-full animate-pulse rounded-xl bg-white/[0.02] ring-1 ring-white/5"
+        role="status"
+        aria-label="Loading temperature chart"
+      />
+    ),
+  },
+);
 
-const DailyForecast: React.FC<DailyForecastProps> = ({ data }) => {
-  const chartData = data.time.map((time, index) => ({
-    day: new Date(time).toLocaleDateString("en-US", { weekday: "short" }),
-    maxTemp: data.temperature_2m_max[index],
-    minTemp: data.temperature_2m_min[index],
-  }));
+type DailyForecastProps = {
+  data: WeatherData["daily"];
+  tempUnit: TempUnit;
+};
+
+const DailyForecast: React.FC<DailyForecastProps> = ({ data, tempUnit }) => {
+  const unitSuffix = tempUnit === "f" ? "°F" : "°C";
+  const days = data.time.map((time) => formatDayLabel(time).weekday);
+  const maxTemps = data.temperature_2m_max.map((t) => toTemp(t, tempUnit));
+  const minTemps = data.temperature_2m_min.map((t) => toTemp(t, tempUnit));
 
   return (
-    <Paper elevation={3} sx={{
-      p: 2, mb: 4, backgroundColor: "rgba(33, 33, 33, 0.7)", color: "white", borderRadius: 16,
-      transition: "box-shadow 0.3s ease-in-out",
-      "&:hover": {
-        boxShadow: "0px 0px 20px 5px rgba(255, 255, 255, 0.5)",
-      },
-    }}>
-      <Typography variant="h5" component="h3" gutterBottom align="center">
-        7-Day Forecast
-      </Typography>
-      <Box sx={{ width: '100%', height: 300 }}>
-        <LineChart
-          series={[
-            { data: chartData.map(d => d.maxTemp), label: 'Max Temp (°C)', color: '#ff5252' },
-            { data: chartData.map(d => d.minTemp), label: 'Min Temp (°C)', color: '#42a5f5' },
-          ]}
-          xAxis={[{ scaleType: 'band', data: chartData.map(d => d.day) }]}
-          yAxis={[{ label: 'Temperature (°C)' }]}
-          margin={{ left: 10, right: 10, top: 30, bottom: 30 }}
-          grid={{ vertical: true, horizontal: true }}
-          slotProps={{
-            legend: {
-              position: { vertical: 'top', horizontal: 'center' },
-            },
-          }}
+    <Card>
+      <SectionHeading
+        level={3}
+        eyebrow="7-day outlook"
+        title="Daily forecast"
+      />
+      <ul
+        className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7"
+        aria-label="7-day details"
+      >
+        {data.time.map((time, index) => (
+          <DayCard
+            key={time}
+            date={time}
+            code={data.weather_code[index]}
+            max={data.temperature_2m_max[index]}
+            min={data.temperature_2m_min[index]}
+            sunrise={data.sunrise[index]}
+            sunset={data.sunset[index]}
+            precipProbability={
+              data.precipitation_probability_max[index] ?? null
+            }
+            windMax={data.wind_speed_10m_max[index]}
+            tempUnit={tempUnit}
+          />
+        ))}
+      </ul>
+      {/* Detail cards above are the text alternative — the chart is progressive enhancement. */}
+      <Box sx={{ width: "100%", height: 300 }}>
+        <DailyChart
+          days={days}
+          maxTemps={maxTemps}
+          minTemps={minTemps}
+          unitSuffix={unitSuffix}
         />
       </Box>
-    </Paper>
+    </Card>
   );
 };
 

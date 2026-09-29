@@ -1,11 +1,17 @@
-import { useState, useEffect, useCallback } from "react";
-import { CityData } from "../app/interfaces";
-import { fetchCityOptions, fetchDefaultCityData } from "../app/api";
+import { useCallback, useState } from "react";
+import type { CityData } from "@/types/weather";
+import { searchCities } from "@/lib/openMeteo";
+import { DEFAULT_CITY } from "@/lib/defaultCity";
 
+/** City search state. Starts at the Vienna default; deep-links override via `handleCitySelect`. */
 export const useSearch = () => {
-  const [city, setCity] = useState<string | null>("Vienna");
+  const [city, setCity] = useState<string | null>(DEFAULT_CITY.name);
   const [cityOptions, setCityOptions] = useState<CityData[]>([]);
-  const [selectedCity, setSelectedCity] = useState<CityData | null>(null);
+  const [searching, setSearching] = useState(false);
+  // Static default — no geocoding round-trip on first visit (Phase 0).
+  const [selectedCity, setSelectedCity] = useState<CityData | null>(
+    DEFAULT_CITY,
+  );
 
   const fetchCityOptionsCallback = useCallback(async (cityName: string) => {
     setCityOptions([]);
@@ -14,18 +20,22 @@ export const useSearch = () => {
       return;
     }
 
+    setSearching(true);
     try {
-      const options = await fetchCityOptions(cityName);
+      const options = await searchCities(cityName);
       setCityOptions(options);
-    } catch (err) {
-      console.error(err);
+    } catch {
+      // Search suggestions are best-effort; the input stays usable.
+      setCityOptions([]);
+    } finally {
+      setSearching(false);
     }
   }, []);
 
   const handleSearchInputChange = (newCity: string) => {
     setCity(newCity);
     if (newCity.trim()) {
-      fetchCityOptionsCallback(newCity);
+      void fetchCityOptionsCallback(newCity);
     } else {
       setCityOptions([]);
     }
@@ -36,27 +46,11 @@ export const useSearch = () => {
     setCityOptions([]);
   };
 
-  useEffect(() => {
-    const loadDefaultCity = async () => {
-      if (city === "Vienna" && !selectedCity) {
-        try {
-          const defaultCityData = await fetchDefaultCityData();
-          if (defaultCityData) {
-            setSelectedCity(defaultCityData);
-            setCity(defaultCityData.name);
-          }
-        } catch (err) {
-          console.error(err);
-        }
-      }
-    };
-    loadDefaultCity();
-  }, [city, selectedCity]);
-
   return {
     city,
     setCity,
     cityOptions,
+    searching,
     selectedCity,
     setSelectedCity,
     handleSearchInputChange,
