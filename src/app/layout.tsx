@@ -58,10 +58,13 @@ export const metadata: Metadata = {
     images: ["/og-cover.png"],
   },
   icons: {
-    icon: "/icon-192.png",
-    apple: "/icon-192.png",
+    // Absolute custom-domain URLs: Next does NOT apply basePath to metadata
+    // icons, so a root-relative "/icon-192.png" 404s on the live project page
+    // (it resolves to the domain root, not /weather). Discovered 2026-09-29.
+    icon: "https://bachi.dev/weather/icon-192.png",
+    apple: "https://bachi.dev/weather/icon-192.png",
   },
-  manifest: "/manifest.webmanifest",
+  manifest: "https://bachi.dev/weather/manifest.webmanifest",
 };
 
 export const viewport: Viewport = {

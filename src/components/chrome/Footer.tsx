@@ -1,4 +1,4 @@
-import { ArrowUp } from "lucide-react";
+import { BackToTopButton } from "./BackToTopButton";
 
 const EMAIL = "fabian@bachi.dev";
 const REPO_URL = "https://github.com/BachiDev/weather";
@@ -53,13 +53,7 @@ export function Footer() {
               Source
             </a>
           </nav>
-          <a
-            href="#top"
-            aria-label="Back to top"
-            className="flex h-10 w-10 items-center justify-center rounded-full text-zinc-400 ring-1 ring-white/10 transition-colors hover:text-white hover:ring-brand-500/50"
-          >
-            <ArrowUp className="h-5 w-5" aria-hidden="true" />
-          </a>
+          <BackToTopButton />
         </div>
         <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs text-zinc-400">

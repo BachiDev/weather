@@ -24,5 +24,8 @@ const OG_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630
 await sharp(Buffer.from(OG_SVG)).png().toFile("public/og-cover.png");
 console.log("public/og-cover.png written");
 
-await sharp("public/icon-192.png").resize(512, 512).png().toFile("public/icon-512.png");
+await sharp("public/icon-192.png")
+  .resize(512, 512)
+  .png()
+  .toFile("public/icon-512.png");
 console.log("public/icon-512.png written (upscaled FB monogram)");
