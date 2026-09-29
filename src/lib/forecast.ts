@@ -1,17 +1,22 @@
 // Hourly-window helpers. The API returns location-local ISO strings
-// ("2026-09-29T14:00") for both `current.time` and `hourly.time`, so a plain
-// lexicographic comparison finds "now" without any timezone conversion.
+// ("2026-09-29T14:00") for `hourly.time`; "now" comes from
+// `locationNowIso(utc_offset_seconds)`, so a plain lexicographic comparison
+// finds the window without any timezone conversion.
 
 export type HourPoint = {
   time: string;
   temp: number;
   code: number;
+  precip: number | null;
+  humidity: number | null;
 };
 
 type HourlyLike = {
   time: string[];
   temperature_2m: number[];
   weather_code: number[];
+  precipitation_probability?: number[];
+  relative_humidity_2m?: number[];
 };
 
 /**
@@ -31,6 +36,32 @@ export function sliceNext24Hours(
       time: hourly.time[i],
       temp: hourly.temperature_2m[i],
       code: hourly.weather_code[i],
+      precip: hourly.precipitation_probability?.[i] ?? null,
+      humidity: hourly.relative_humidity_2m?.[i] ?? null,
+    });
+  }
+  return points;
+}
+
+/**
+ * All 24 hourly points of one daily index (0 = first day). The hourly arrays
+ * run midnight-to-midnight per day, aligned with `daily.time` order.
+ * Out-of-range indices (or short arrays) yield whatever exists, possibly [].
+ */
+export function sliceDayHours(
+  hourly: HourlyLike,
+  dayIndex: number,
+): HourPoint[] {
+  if (!Number.isInteger(dayIndex) || dayIndex < 0) return [];
+  const points: HourPoint[] = [];
+  const start = dayIndex * 24;
+  for (let i = start; i < Math.min(start + 24, hourly.time.length); i++) {
+    points.push({
+      time: hourly.time[i],
+      temp: hourly.temperature_2m[i],
+      code: hourly.weather_code[i],
+      precip: hourly.precipitation_probability?.[i] ?? null,
+      humidity: hourly.relative_humidity_2m?.[i] ?? null,
     });
   }
   return points;

@@ -26,6 +26,8 @@ export interface WeatherData {
     time: string[];
     temperature_2m: number[];
     weather_code: number[];
+    precipitation_probability: number[];
+    relative_humidity_2m: number[];
   };
   latitude: number;
   longitude: number;
@@ -50,4 +52,12 @@ export interface GeoResult {
   country: string;
   admin1?: string;
   postcode?: string[];
+}
+
+export interface AirQuality {
+  current: {
+    us_aqi: number;
+    pm2_5: number;
+    ozone: number;
+  };
 }

@@ -36,6 +36,11 @@ body {
   outline-offset: 2px;
 }
 
+/* Every clickable reads as clickable (Tailwind v4 defaults buttons to `default`). */
+button:not(:disabled) {
+  cursor: pointer;
+}
+
 /* Skip link: hidden until focused. */
 .skip-link {
   position: fixed;
@@ -67,20 +72,22 @@ body {
   }
 }
 
-.custom-scrollbar::-webkit-scrollbar {
-  height: 6px;
-  width: 6px;
+/* Scene backdrop crossfade (re-triggered via key change). Static for reduced-motion. */
+@keyframes scene-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
+.scene-fade {
+  animation: scene-in 1.2s ease-out;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #52525b;
-  border-radius: 999px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #71717a;
+@media (prefers-reduced-motion: reduce) {
+  .scene-fade {
+    animation: none;
+  }
 }

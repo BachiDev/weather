@@ -5,7 +5,13 @@ import { Box } from "@mui/material";
 import { Card } from "./ui/Card";
 import { SectionHeading } from "./ui/SectionHeading";
 import { DayCard } from "./DayCard";
-import { formatDayLabel, toTemp, type TempUnit } from "@/lib/units";
+import {
+  formatDayLabel,
+  toTemp,
+  type HourFormat,
+  type SpeedUnit,
+  type TempUnit,
+} from "@/lib/units";
 import type { WeatherData } from "@/types/weather";
 
 const DailyChart = dynamic(
@@ -25,9 +31,20 @@ const DailyChart = dynamic(
 type DailyForecastProps = {
   data: WeatherData["daily"];
   tempUnit: TempUnit;
+  speedUnit: SpeedUnit;
+  hourFormat: HourFormat;
+  selectedDay: number | null;
+  onSelectDay: (index: number) => void;
 };
 
-const DailyForecast: React.FC<DailyForecastProps> = ({ data, tempUnit }) => {
+const DailyForecast: React.FC<DailyForecastProps> = ({
+  data,
+  tempUnit,
+  speedUnit,
+  hourFormat,
+  selectedDay,
+  onSelectDay,
+}) => {
   const unitSuffix = tempUnit === "f" ? "°F" : "°C";
   const days = data.time.map((time) => formatDayLabel(time).weekday);
   const maxTemps = data.temperature_2m_max.map((t) => toTemp(t, tempUnit));
@@ -58,6 +75,10 @@ const DailyForecast: React.FC<DailyForecastProps> = ({ data, tempUnit }) => {
             }
             windMax={data.wind_speed_10m_max[index]}
             tempUnit={tempUnit}
+            speedUnit={speedUnit}
+            hourFormat={hourFormat}
+            selected={selectedDay === index}
+            onSelect={() => onSelectDay(index)}
           />
         ))}
       </ul>

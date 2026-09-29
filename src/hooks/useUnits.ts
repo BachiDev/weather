@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import type { SpeedUnit, TempUnit } from "@/lib/units";
+import type { HourFormat, SpeedUnit, TempUnit } from "@/lib/units";
 import { readJSON, writeJSON } from "@/lib/storage";
 
 const UNITS_KEY = "weather:units";
@@ -7,21 +7,28 @@ const UNITS_KEY = "weather:units";
 type Units = {
   temp: TempUnit;
   speed: SpeedUnit;
+  hour: HourFormat;
 };
 
 function loadUnits(): Units {
+  // Old stored values predate `hour` — missing keys fall back to defaults.
   const stored = readJSON<Partial<Units>>(UNITS_KEY, {});
   return {
     temp: stored.temp === "f" ? "f" : "c",
     speed: stored.speed === "mph" ? "mph" : "kmh",
+    hour: stored.hour === "12h" ? "12h" : "24h",
   };
 }
 
-/** Persisted °C/°F + km/h/mph toggle. Conversions are client-side (no refetch). */
+/** Persisted °C/°F + km/h/mph + 12h/24h toggles. Conversions are client-side (no refetch). */
 export function useUnits() {
   // Defaults first, stored prefs after mount: reading localStorage during
   // render would hydrate differently than the server HTML on repeat visits.
-  const [units, setUnits] = useState<Units>({ temp: "c", speed: "kmh" });
+  const [units, setUnits] = useState<Units>({
+    temp: "c",
+    speed: "kmh",
+    hour: "24h",
+  });
 
   useEffect(() => {
     setUnits(loadUnits());
@@ -49,10 +56,23 @@ export function useUnits() {
     });
   }, []);
 
+  const toggleHour = useCallback(() => {
+    setUnits((prev) => {
+      const next = {
+        ...prev,
+        hour: (prev.hour === "12h" ? "24h" : "12h") as HourFormat,
+      };
+      writeJSON(UNITS_KEY, next);
+      return next;
+    });
+  }, []);
+
   return {
     tempUnit: units.temp,
     speedUnit: units.speed,
+    hourFormat: units.hour,
     toggleTemp,
     toggleSpeed,
+    toggleHour,
   };
 }

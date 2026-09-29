@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 import {
   cityFromParams,
   decodeCityParams,
+  decodeCompareParam,
+  decodeDayParam,
   encodeCityParams,
+  encodeCompare,
 } from "@/lib/params";
 
 describe("city deep-link params", () => {
@@ -34,5 +37,50 @@ describe("city deep-link params", () => {
     expect(a.label).toBe("Linz");
     expect(a.id).toBe(b.id);
     expect(a.id).toBeLessThan(0);
+  });
+});
+
+describe("decodeDayParam", () => {
+  it("accepts 0..6 and rejects everything else", () => {
+    expect(decodeDayParam(new URLSearchParams("day=0"))).toBe(0);
+    expect(decodeDayParam(new URLSearchParams("day=6"))).toBe(6);
+    expect(decodeDayParam(new URLSearchParams(""))).toBeNull();
+    expect(decodeDayParam(new URLSearchParams("day="))).toBeNull();
+    expect(decodeDayParam(new URLSearchParams("day=7"))).toBeNull();
+    expect(decodeDayParam(new URLSearchParams("day=-1"))).toBeNull();
+    expect(decodeDayParam(new URLSearchParams("day=2.5"))).toBeNull();
+    expect(decodeDayParam(new URLSearchParams("day=nope"))).toBeNull();
+  });
+});
+
+describe("compare params", () => {
+  const graz = { name: "Graz", latitude: 47.07, longitude: 15.43 };
+  const sao = { name: "São Paulo", latitude: -23.55, longitude: -46.63 };
+
+  it("round-trips names with spaces and umlauts", () => {
+    const encoded = encodeCompare([graz, sao]);
+    const decoded = decodeCompareParam(
+      new URLSearchParams(`compare=${encodeURIComponent(encoded)}`),
+    );
+    expect(decoded.map((c) => c.name)).toEqual(["Graz", "São Paulo"]);
+    expect(decoded[0].latitude).toBe(47.07);
+  });
+
+  it("caps at three, dedupes, and rejects garbage", () => {
+    const four = [
+      graz,
+      sao,
+      { ...graz, name: "Graz2" },
+      { name: "Linz", latitude: 48.3, longitude: 14.28 },
+    ];
+    const decoded = decodeCompareParam(
+      new URLSearchParams(`compare=${encodeURIComponent(encodeCompare(four))}`),
+    );
+    expect(decoded).toHaveLength(3);
+    expect(decodeCompareParam(new URLSearchParams("compare=|||"))).toEqual([]);
+    expect(decodeCompareParam(new URLSearchParams("compare=X~999~0"))).toEqual(
+      [],
+    );
+    expect(decodeCompareParam(new URLSearchParams(""))).toEqual([]);
   });
 });

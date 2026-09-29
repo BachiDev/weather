@@ -21,7 +21,8 @@ export class WeatherApiError extends Error {
   }
 }
 
-async function fetchJson(
+// Shared by the forecast + air-quality clients (same timeout/cancel semantics).
+export async function fetchJson(
   url: string,
   signal?: AbortSignal,
   timeoutMs = REQUEST_TIMEOUT_MS,
@@ -137,7 +138,8 @@ export async function fetchWeather(
       "temperature_2m,apparent_temperature,is_day,wind_speed_10m,wind_direction_10m,relative_humidity_2m,surface_pressure,weather_code",
     daily:
       "weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_probability_max,wind_speed_10m_max",
-    hourly: "temperature_2m,weather_code",
+    hourly:
+      "temperature_2m,weather_code,precipitation_probability,relative_humidity_2m",
     timezone: "auto",
     forecast_days: "7",
   });

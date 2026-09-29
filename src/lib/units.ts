@@ -3,6 +3,8 @@
 
 export type TempUnit = "c" | "f";
 export type SpeedUnit = "kmh" | "mph";
+/** 12h → "7:12 AM" / "2 PM"; 24h → "07:12" / "14". */
+export type HourFormat = "12h" | "24h";
 
 export function toTemp(celsius: number, unit: TempUnit): number {
   const value = unit === "f" ? (celsius * 9) / 5 + 32 : celsius;
@@ -47,13 +49,18 @@ export function formatWindDirection(degrees: number): string {
   return COMPASS_16[Math.round(normalized / 22.5) % 16];
 }
 
-/** "2026-09-29T07:12" (location-local ISO) → "7:12 AM". */
-export function formatTimeOfDay(iso: string): string {
+/** "2026-09-29T07:12" (location-local ISO) → "7:12 AM" (12h) or "07:12" (24h). */
+export function formatTimeOfDay(
+  iso: string,
+  hourFormat: HourFormat = "12h",
+): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
+  const use12h = hourFormat === "12h";
   return date.toLocaleTimeString("en-US", {
-    hour: "numeric",
+    hour: use12h ? "numeric" : "2-digit",
     minute: "2-digit",
+    hour12: use12h,
   });
 }
 
@@ -73,9 +80,17 @@ export function formatDayLabel(isoDate: string): {
   };
 }
 
-/** "2026-09-29T14:00" → "2 PM". */
-export function formatHourLabel(iso: string): string {
+/** "2026-09-29T14:00" → "2:00 PM" (12h) or "14:00" (24h). */
+export function formatHourLabel(
+  iso: string,
+  hourFormat: HourFormat = "24h",
+): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleTimeString("en-US", { hour: "numeric", hour12: true });
+  const use12h = hourFormat === "12h";
+  return date.toLocaleTimeString("en-US", {
+    hour: use12h ? "numeric" : "2-digit",
+    minute: "2-digit",
+    hour12: use12h,
+  });
 }

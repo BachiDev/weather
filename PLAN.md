@@ -349,12 +349,62 @@ Ship F1–F7 + F9 in v1; F8/F10 if smooth; F11/F12 out.
   4. DevTools Network throttling (Fast 4G): skeleton → results, no CLS.
 - [x] Lighthouse triage 2026-09-29 (report `localhost_3000-*.json`): Perf 76 / A11y 100 / BP 100 / SEO 91 — **but measured against the Turbopack dev server**, so perf numbers are noise (dev-only: `next-devtools` 1.38 MB, unminified react-dom 896 KB, 36 scripts, HMR WebSocket, `no-store` → the unminified/unused-JS, TTI 9.3s, and both bf-cache failures all evaporate in production; prod first load is 193 kB). Two real takeaways: (1) `label-content-name-mismatch` on the units toggle (aria-label "Use Celsius" vs visible "°C") — fixed to "Temperature unit °C" style labels; (2) `meta-description` fail was a stale dev server (tag verified present in `out/index.html`). Re-run protocol: `npm run build` (no env) + `npx serve out` + incognito + mobile, never `next dev`.
 
-### Phase 4 — Launch & iterate (ongoing)
+### Phase 4 — Launch & iterate (in progress)
 
-- [ ] Merge → Pages deploy; verify live demo + back-links from bachi.dev `/work` (update the portfolio `projects.ts` screenshot/entry if the look changed materially).
-- [ ] Favorites (F8) + PWA installability (F10) if desired; per-city sunrise/sunset hero tint polish.
-- [ ] Quarterly: dep bumps, re-run Lighthouse, refresh OG cover + README screenshot, copyright year (dynamic).
-- [ ] Explicitly out: radar/maps layer (F12), 7-day hourly browser (F11) — revisit only on demand.
+- [x] Live deploy verified: production Lighthouse at https://bachi.dev/weather/ → **99 / 100 / 100 / 100** (Perf/A11y/BP/SEO).
+- [x] CI incident 2026-09-29 (red `CI #1` run): `test:coverage` died with `webidl.util.markAsUncloneable is not a function` (jsdom → undici chain) — **jsdom 30 requires Node `^22.22.2 || ^24.15.0 || >=26`**, but the workflows pinned Node 20 (copied from the main site, which has no jsdom tests). Local Node 24 masked it. Fixed: `ci.yml` + `pages.yml` → Node 22.
+- [x] Duplicate-deploy incident 2026-09-29 (3 runs per push): the repo carried the stock GitHub Pages starter `.github/workflows/nextjs.yml` (commit `f572578 Create nextjs.yml`, created via the GitHub web UI when Pages was enabled) next to our `ci.yml` + `pages.yml` — two racers deploying the same Pages environment. Deleted the starter; `pages.yml` (explicit `GITHUB_PAGES` basePath, no `configure-pages` magic) is the single deploy path. Expect exactly 2 runs per push from now (CI + Deploy to Pages).
+- [ ] Link back from bachi.dev `/work` (update the portfolio `projects.ts` entry/screenshot if the new look warrants it).
+- [ ] Optional follow-ups: favorites (F8), PWA installability (F10), quarterly dep/Lighthouse refresh.
+
+### Phase 5 — Impressive features (proposed, not started)
+
+Goal: keep the sturdy foundation, add the "wow" a portfolio visitor remembers — all with **keyless, free APIs** (Open-Meteo family, RainViewer) and **zero new runtime deps** (first load must stay ≤ 220 kB; hand-rolled SVG/CSS over libraries).
+
+#### 5A — Atmosphere (done 2026-09-29)
+
+- [x] **A1 Condition-reactive backdrop** (`src/lib/scene.ts` + `SceneBackdrop`): 9 scenes from WMO code + `is_day` as inline-style radial glows (no Tailwind purge risk), key-based crossfade with reduced-motion static fallback, `aria-hidden`. 4 tests.
+- [x] **A2 Sun arc** (`src/lib/sun.ts` + `SunArc`): dashed SVG arc, live dot from `sunrise/sunset + locationNowIso()`, times row, `role="img"` label; polar/garbage → times-only fallback, never crashes. 5 tests (incl. a `sin(π)` float lesson — tolerance, not exact equality).
+- [x] **A3 Moon phase** (`src/lib/moon.ts` + `MoonPhase`): synodic-month math from the 2000-01-06 new moon (name + illumination % + moon day), mount-guarded render (same hydration class as Phase-2 storage — `Date.now()` differs server/client). 4 tests incl. periodicity invariant.
+- [x] Wired in `page.tsx`: backdrop behind everything + Sun/Moon 2-col grid between current and daily. Cost: **+1 kB first load (194 kB)** — pure CSS/SVG/math, zero deps, as budgeted.
+- [x] Feedback round 2026-09-29 (priority + density + bugs):
+  - **Order:** sun/moon moved to the end (after hourly) — forecasts first, atmosphere last.
+  - **Density:** hourly + sun/moon share a `lg:grid-cols-5` row (hourly spans 3, sun/moon stack in 2) — fills wide screens, stacks on mobile.
+  - **Bugfix (reported):** `DayCard` wind hardcoded `km/h` — now `formatSpeed(windMax, speedUnit)` + regression test.
+  - **New: 12h/24h toggle** (`HourFormat`, persisted in the same `weather:units` key, backward-compatible with pre-hour stored prefs): third segment group (`12h`/`24h`, labels contain visible text per WCAG 2.5.3), threaded through hourly labels, day-card/current sun times, and sun arc. 24h uses 2-digit hours (`07:12`, `14`).
+  - **Test-infra fix found en route:** RTL renders leaked across tests (no auto-cleanup without vitest globals) — explicit `afterEach(cleanup)` in `tests/setup.ts`. 63/63 green, first load unchanged at 194 kB.
+- [x] Polish round 2026-09-29 (density + prefs): hourly strip **wraps into rows** (even-fill `flex-1 min-w-16`, no scroll); hour labels carry minutes (`2:00 PM` / `14:00`); **24h is first + default** (stored `12h` prefs still respected, backward-compatible); hero de-cluttered (stack pills + "no API key" eyebrow removed, H1 + lede only); dead code pruned (`Pill`, `custom-scrollbar` CSS). 63/63 green, 194 kB unchanged.
+
+#### 5B — Data depth (done 2026-09-29)
+
+- [x] **B1 Air-quality card** (`src/lib/airQuality.ts` + `useAirQuality` + `AirQualityCard`): keyless Open-Meteo AQI API (response shape verified live before coding), 10-min cache, US AQI badge (6 purge-safe color bands) + PM2.5/O₃ stats; failures degrade to a quiet note, never blank the page. Slim strip under the current card. 7 tests.
+- [x] **B2 "Rain next 24h"** (`PrecipForecast` + lazy `PrecipChart`): hourly query extended (`precipitation_probability`, `relative_humidity_2m` — 200 verified), composed bar (rain) + line (humidity) chart on a shared 0–100 axis, 3-hour ticks, custom HTML legend (dodged an uncertain `ChartsLegend` API). Rides the existing lazy x-charts chunk.
+- [x] **B3 Day drill-down:** `DayCard` is now a real `<button>` (phrasing-content-only internals for valid HTML, `aria-pressed`, full-card accessible name) → hourly grid shows that day's 24 points (`sliceDayHours`, tested) with day-labeled heading + "← Back to next 24 hours" reset; `?day=` deep-link (read on mount, written on select, cleared on city change); smooth scroll to `#hourly` honoring reduced-motion. `decodeDayParam` tested.
+- [x] Cost: **197 kB first load** (+3 kB, still ≤ 220 kB budget). 76/76 tests green; prerender re-verified (search + skeleton; data sections correctly client-only).
+- [x] Polish round 2, 2026-09-29 (click affordance + AQI fold-in): `button:not(:disabled) { cursor: pointer }` base rule (covers toggles, day cards, retry, geolocate — Tailwind v4 defaults buttons to `default`); AQI strip folded into the current card (AQI tile with band-tinted value + Leaf icon, PM2.5 tile, "—" placeholders while loading/unavailable, zero layout shift, `AirQualityCard.tsx` deleted); sunrise/sunset stats removed (SunArc owns them); `Stat` gained `icon` + `valueClassName`. 76/76 green, 197 kB unchanged.
+- [x] Polish round 3, 2026-09-29 (drill-down everywhere + wrap fix): DayCard meta rows regrouped into `whitespace-nowrap` groups (100% precip no longer pushes km/h to the next line); precip chart follows the drilled day (`sliceDayHours` reuse, day-labeled heading); SunArc shows the drilled day's times without a live dot (`Sun path · {day}` label); MoonPhase takes the drilled date (deterministic, still mount-guarded for tonight — eyebrow shows the day). Tests: SunArc dot/no-dot, MoonPhase deterministic full moon (which caught a real a11y insight: `aria-label` on a generic div is ignored — dropped it since the text is self-describing). 80/80 green, 197 kB unchanged.
+- [x] Polish round 4, 2026-09-29 (uniformity): DayCard buttons are `h-full` (grid rows render equal heights); feels-like hero line removed (tile already shows it); `Stat` tiles fixed to `min-h-[78px]`, centered, `whitespace-nowrap` value+label, compact `text-base`, icon on every tile (incl. CloudFog for PM2.5); AQI labels shortened for tiles (`USG`, `V. unhealthy` via new `AqiBand.short`, tested). 81/81 green, 197 kB unchanged.
+- [x] Branding 2026-09-29: tab icon is now the FB monogram (`public/icon-192.png` copied from bachi.dev's `android-chrome-192x192.png`; `icon-512.png` upscaled from it via `npm run assets`; stale Next-default `favicon.ico` deleted — no `rel="icon"` to it remains). OG cover de-sunned (text + glow + accent bar only, matching the main-site OG style).
+- [x] Edit discipline note (two self-inflicted doc-comment clobbers fixed immediately): when appending to a file, anchor on the *end* of the previous block, never on the next block's comment.
+
+#### 5C — Portfolio showpieces (done 2026-09-29)
+
+- [x] **C1 City compare** (`useCompareWeather` + `CompareSection`): up to 3 cities, parallel cached fetch, per-city error isolation + section retry, persisted + shareable `?compare=name~lat~lon|…` URL (umlaut-safe, capped, validated, tested). Toolbar "Compare" button with full/disabled states. 5 tests.
+- [x] **C2 Rain radar, zero map deps** (`src/lib/tiles.ts` + `RadarMap`): OSM base (dark-filtered) + RainViewer overlay on a hand-rolled 3×3 tile grid, zoom 4–10, frame slider + play/pause (user-initiated only), location-local frame labels, attribution, lazy-loaded. 9 tests (known-tile vectors, antimeridian/pole handling, manifest guards).
+- [x] **C3 ⌘K palette** (`CommandPalette`): current + recents with filter, native-button keyboard support, autofocus-in-dialog (justified disable), backdrop as a real dismiss button (restructured after jsx-a11y flagged the div-handler pattern), global mod+K toggle. 3 tests.
+- [x] Cost: **200 kB first load** (radar rides a lazy chunk; compare+palette in main). 98/98 tests green; prerender re-verified.
+- [x] Tooling lesson: Turbopack dev artifacts in `.next` poisoned a prod build (`[turbopack]_runtime.js` prerender crash) — added cross-platform `prebuild` clean (no dep). If `next build` ever fails this way again, that script is why it won't.
+- [x] Radar fix 2026-09-29 (reported: tiles "misordered"): the tile math and grid order were correct — the bug was geometry. A 16:9 box with a 3×3 grid makes 16:9 cells, but tiles are square, so `object-cover` cropped ~44% off the top/bottom of every tile: rows went discontinuous at the seams (features "skipped", diagonals looked horizontally shifted). Fixed with a square box (`aspect-square`, capped at 560px) where square tiles fit exactly — zero crop, seamless. Also index-suffixed tile keys (y-clamp can legitimately repeat a tile at polar/low-zoom edges; React still needs unique keys).
+
+#### Explicitly out (documented, not forgotten)
+
+- Severe-weather alerts (no free global source with usable coverage), full i18n (per decision #5), animated radar loop, PWA offline-first (static export + live API = limited value; manifest stays as-is), clothing/activity advice (gimmicky, unprovable).
+
+#### Acceptance (in addition to §11)
+
+- [ ] Each feature: unit-tested pure logic + component smoke test + skeleton/error/empty states + reduced-motion + keyboard support.
+- [ ] First load ≤ 220 kB, Lighthouse perf ≥ 95 on production re-run.
+- [ ] No new runtime dependencies (devDeps for tests excepted).
 
 **Estimated total:** 3–4 focused days solo. Phase 1 alone delivers ~70% of the perceived level up.
 

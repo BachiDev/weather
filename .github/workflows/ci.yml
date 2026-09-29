@@ -15,7 +15,9 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          # Node 22+: jsdom 30 requires ^22.22.2 || ^24.15.0 || >=26 —
+          # the suite cannot even load on Node 20 (webidl error).
+          node-version: "22"
           cache: npm
       - name: Install dependencies
         run: npm ci

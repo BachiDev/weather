@@ -59,7 +59,15 @@ describe("time formatting", () => {
   });
 
   it("formats hour labels compactly", () => {
-    expect(formatHourLabel("2026-09-29T14:00")).toBe("2 PM");
+    expect(formatHourLabel("2026-09-29T14:00", "12h")).toBe("2:00 PM");
+    expect(formatHourLabel("2026-09-29T14:00", "24h")).toBe("14:00");
+    expect(formatHourLabel("2026-09-29T07:00", "24h")).toBe("07:00");
+    expect(formatHourLabel("2026-09-29T14:00")).toBe("14:00");
+  });
+
+  it("supports 24-hour time of day", () => {
+    expect(formatTimeOfDay("2026-09-29T07:12", "24h")).toBe("07:12");
+    expect(formatTimeOfDay("2026-09-29T19:05", "24h")).toBe("19:05");
   });
 
   it("falls back gracefully for garbage input", () => {

@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { locationNowIso, sliceNext24Hours } from "@/lib/forecast";
+import {
+  locationNowIso,
+  sliceDayHours,
+  sliceNext24Hours,
+} from "@/lib/forecast";
 
 function hourlyFixture(): {
   time: string[];
@@ -55,5 +59,32 @@ describe("locationNowIso", () => {
     const nowMs = Date.UTC(2026, 8, 29, 12, 30, 0); // 14:30 local, offset +2
     const points = sliceNext24Hours(hourly, locationNowIso(7200, nowMs));
     expect(points[0].time).toBe("2026-09-29T15:00");
+  });
+});
+
+describe("sliceDayHours", () => {
+  it("returns all 24 points of one day", () => {
+    const points = sliceDayHours(hourlyFixture(), 1);
+    expect(points).toHaveLength(24);
+    expect(points[0].time).toBe("2026-09-30T00:00");
+    expect(points[23].time).toBe("2026-09-30T23:00");
+  });
+
+  it("carries precip and humidity when present", () => {
+    const hourly = {
+      ...hourlyFixture(),
+      precipitation_probability: Array(48).fill(20),
+      relative_humidity_2m: Array(48).fill(60),
+    };
+    const points = sliceDayHours(hourly, 0);
+    expect(points[0].precip).toBe(20);
+    expect(points[0].humidity).toBe(60);
+  });
+
+  it("returns nulls when the extras are missing and [] for bad indices", () => {
+    expect(sliceDayHours(hourlyFixture(), 0)[0].precip).toBeNull();
+    expect(sliceDayHours(hourlyFixture(), -1)).toEqual([]);
+    expect(sliceDayHours(hourlyFixture(), 1.5)).toEqual([]);
+    expect(sliceDayHours(hourlyFixture(), 9)).toEqual([]);
   });
 });

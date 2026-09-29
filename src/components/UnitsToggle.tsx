@@ -1,13 +1,15 @@
 "use client";
 
 import { cn } from "@/lib/cn";
-import type { SpeedUnit, TempUnit } from "@/lib/units";
+import type { HourFormat, SpeedUnit, TempUnit } from "@/lib/units";
 
 type UnitsToggleProps = {
   tempUnit: TempUnit;
   speedUnit: SpeedUnit;
+  hourFormat: HourFormat;
   onToggleTemp: () => void;
   onToggleSpeed: () => void;
+  onToggleHour: () => void;
 };
 
 function Segment({
@@ -39,15 +41,21 @@ function Segment({
   );
 }
 
-/** Persisted °C/°F + km/h/mph segmented toggle. Conversions need no refetch. */
+/** Persisted °C/°F + km/h/mph + 12h/24h toggles. Conversions need no refetch. */
 export function UnitsToggle({
   tempUnit,
   speedUnit,
+  hourFormat,
   onToggleTemp,
   onToggleSpeed,
+  onToggleHour,
 }: UnitsToggleProps) {
   return (
-    <div className="flex items-center gap-2" role="group" aria-label="Units">
+    <div
+      className="flex flex-wrap items-center justify-center gap-2"
+      role="group"
+      aria-label="Units"
+    >
       <div className="flex items-center gap-0.5 rounded-full bg-white/5 p-0.5 ring-1 ring-white/10">
         <Segment
           active={tempUnit === "c"}
@@ -74,6 +82,20 @@ export function UnitsToggle({
           onClick={onToggleSpeed}
           label="mph"
           pressedLabel="Speed unit mph"
+        />
+      </div>
+      <div className="flex items-center gap-0.5 rounded-full bg-white/5 p-0.5 ring-1 ring-white/10">
+        <Segment
+          active={hourFormat === "24h"}
+          onClick={onToggleHour}
+          label="24h"
+          pressedLabel="Time format 24h"
+        />
+        <Segment
+          active={hourFormat === "12h"}
+          onClick={onToggleHour}
+          label="12h"
+          pressedLabel="Time format 12h"
         />
       </div>
     </div>

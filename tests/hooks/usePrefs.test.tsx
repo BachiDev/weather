@@ -13,19 +13,23 @@ describe("useUnits", () => {
     const { result, unmount } = renderHook(() => useUnits());
     expect(result.current.tempUnit).toBe("c");
     expect(result.current.speedUnit).toBe("kmh");
+    expect(result.current.hourFormat).toBe("24h");
 
     act(() => {
       result.current.toggleTemp();
       result.current.toggleSpeed();
+      result.current.toggleHour();
     });
     expect(result.current.tempUnit).toBe("f");
     expect(result.current.speedUnit).toBe("mph");
+    expect(result.current.hourFormat).toBe("12h");
     unmount();
 
     // A fresh mount reads the stored prefs (after the mount effect).
     const second = renderHook(() => useUnits());
     await waitFor(() => expect(second.result.current.tempUnit).toBe("f"));
     expect(second.result.current.speedUnit).toBe("mph");
+    expect(second.result.current.hourFormat).toBe("12h");
   });
 });
 
